@@ -5,6 +5,8 @@ from transformers import pipeline
 from PIL import Image
 import io
 import asyncio
+from flask import Flask
+from threading import Thread
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -14,6 +16,15 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 tree = discord.app_commands.CommandTree(client)
+
+
+app = Flask(__name__)
+@app.route('/')
+def home():
+  return "on the line and running!"
+
+def run_web_server():
+  app.run(host='0.0.0.0', port=10000)
 
 print("Loading model...")
 try:
@@ -96,5 +107,9 @@ async def analyze_sentiment(interaction: discord.Interaction, text: str):
     print(f"Error during sentiment analysis: {e}")
     await interaction.followup.send("Sorry, I couldn't analyze the sentiment of the text.")
 
+
+if __name__ == "__main__":
+  web_server_thread = Thread(target=run_web_server)
+  web_server_thread.start()
 
 client.run(TOKEN)
